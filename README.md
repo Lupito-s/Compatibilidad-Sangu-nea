@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Compatibilidad Sanguínea</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fade-in-up {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes slide-up {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.8s ease-out;
+        }
+        
+        .animate-fade-in-up {
+            animation: fade-in-up 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .animate-slide-up {
+            animation: slide-up 0.8s ease-out;
+        }
+        
+        .animate-bounce {
+            animation: bounce 2s infinite;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .blood-type-card {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.125rem;
+            border-width: 2px;
+            transition: all 0.5s ease;
+        }
+        
+        .blood-type-card.donate {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #15803d;
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .blood-type-card.receive {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .blood-type-card.inactive {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #6b7280;
+            transform: scale(0.95);
+            opacity: 0.5;
+        }
+        
+        .selected-type {
+            animation: pulse 1.5s infinite;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 64rem;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="container">
+            <!-- Header -->
+            <div class="text-center mb-8 animate-fade-in">
+                <div class="flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="animate-bounce text-red-500 mr-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+                    </svg>
+                    <h1 class="text-3xl font-bold text-gray-800">Compatibilidad Sanguínea</h1>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="animate-pulse text-red-500 ml-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                    </svg>
+                </div>
+                <p class="text-gray-600">Selecciona tu tipo de sangre para ver las compatibilidades</p>
+            </div>
+
+            <!-- Blood Type Selection -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8 transform transition-all duration-500 hover:shadow-xl">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+                    Selecciona tu tipo de sangre
+                </h2>
+                <div class="grid grid-cols-4 gap-4 max-w-md mx-auto" id="blood-type-buttons">
+                    <!-- Blood type buttons will be added here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Initial Message -->
+            <div class="text-center py-12 animate-fade-in" id="initial-message">
+                <svg xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto mb-4 animate-bounce" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+                </svg>
+                <p class="text-gray-500 text-lg">
+                    Selecciona tu tipo de sangre para ver las compatibilidades
+                </p>
+            </div>
+
+            <!-- Compatibility Results -->
+            <div class="space-y-6 animate-slide-up hidden" id="compatibility-results">
+                <!-- Selected Blood Type Info -->
+                <div class="bg-white rounded-xl shadow-lg p-6 text-center transform transition-all duration-700 animate-fade-in-up">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="w-20 h-20 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-2xl mr-4 animate-bounce" id="selected-blood-type">
+                            <!-- Will be filled by JavaScript -->
+                        </div>
+                        <div class="text-left">
+                            <h3 class="text-xl font-semibold text-gray-800">Tu tipo de sangre</h3>
+                            <p class="text-gray-600" id="blood-type-description">
+                                <!-- Will be filled by JavaScript -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donation Compatibility -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-700 animate-fade-in-up" style="animation-delay: 200ms">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="text-green-500 mr-2 animate-pulse" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                        <h3 class="text-xl font-semibold text-gray-800">Puedes donar a:</h3>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 justify-items-center" id="donate-compatibility">
+                        <!-- Will be filled by JavaScript -->
+                    </div>
+                    <p class="text-sm text-gray-600 mt-4 text-center animate-fade-in" style="animation-delay: 1000ms">
+                        <span class="font-semibold text-green-600">Verde:</span> Compatibles para recibir tu sangre
+                    </p>
+                </div>
+
+                <!-- Reception Compatibility -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all duration-700 animate-fade-in-up" style="animation-delay: 400ms">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="text-blue-500 mr-2 animate-pulse" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5"/>
+                            <path d="m12 19-7-7 7-7"/>
+                        </svg>
+                        <h3 class="text-xl font-semibold text-gray-800">Puedes recibir de:</h3>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 justify-items-center" id="receive-compatibility">
+                        <!-- Will be filled by JavaScript -->
+                    </div>
+                    <p class="text-sm text-gray-600 mt-4 text-center animate-fade-in" style="animation-delay: 1200ms">
+                        <span class="font-semibold text-blue-600">Azul:</span> Compatibles para donarte sangre
+                    </p>
+                </div>
+
+                <!-- Important Note -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 transform transition-all duration-700 animate-fade-in-up" style="animation-delay: 600ms">
+                    <div class="flex items-start">
+                        <div class="text-yellow-600 mr-3 mt-1 animate-bounce">⚠️</div>
+                        <div>
+                            <h4 class="font-semibold text-yellow-800 mb-2">Información importante</h4>
+                            <p class="text-yellow-700 text-sm">
+                                Esta información es solo para fines educativos. Siempre consulta con profesionales médicos 
+                                para decisiones relacionadas con donación o transfusión de sangre. Las compatibilidades pueden 
+                                variar según otros factores médicos específicos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Blood type data
+        const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+        
+        const compatibilityData = {
+            'O-': {
+                canDonateTo: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
+                canReceiveFrom: ['O-'],
+                description: 'Donante universal'
+            },
+            'O+': {
+                canDonateTo: ['O+', 'A+', 'B+', 'AB+'],
+                canReceiveFrom: ['O-', 'O+'],
+                description: 'Donante universal para Rh+'
+            },
+            'A-': {
+                canDonateTo: ['A-', 'A+', 'AB-', 'AB+'],
+                canReceiveFrom: ['O-', 'A-'],
+                description: 'Compatible con grupo A'
+            },
+            'A+': {
+                canDonateTo: ['A+', 'AB+'],
+                canReceiveFrom: ['O-', 'O+', 'A-', 'A+'],
+                description: 'Compatible con grupo A y Rh+'
+            },
+            'B-': {
+                canDonateTo: ['B-', 'B+', 'AB-', 'AB+'],
+                canReceiveFrom: ['O-', 'B-'],
+                description: 'Compatible con grupo B'
+            },
+            'B+': {
+                canDonateTo: ['B+', 'AB+'],
+                canReceiveFrom: ['O-', 'O+', 'B-', 'B+'],
+                description: 'Compatible con grupo B y Rh+'
+            },
+            'AB-': {
+                canDonateTo: ['AB-', 'AB+'],
+                canReceiveFrom: ['O-', 'A-', 'B-', 'AB-'],
+                description: 'Receptor universal para Rh-'
+            },
+            'AB+': {
+                canDonateTo: ['AB+'],
+                canReceiveFrom: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
+                description: 'Receptor universal'
+            }
+        };
+
+        // Add blood type buttons
+        const bloodTypeButtonsContainer = document.getElementById('blood-type-buttons');
+        
+        bloodTypes.forEach((type, index) => {
+            const button = document.createElement('button');
+            button.className = `w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-500 hover:scale-110 active:scale-95 transform bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 hover:shadow-md`;
+            button.style.animationDelay = `${index * 100}ms`;
+            button.textContent = type;
+            
+            button.addEventListener('click', () => selectBloodType(type));
+            
+            bloodTypeButtonsContainer.appendChild(button);
+        });
+
+        // Handle blood type selection
+        function selectBloodType(type) {
+            // Reset all buttons
+            const buttons = bloodTypeButtonsContainer.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.className = `w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-500 hover:scale-110 active:scale-95 transform bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 hover:shadow-md`;
+            });
+            
+            // Highlight selected button
+            const selectedButton = Array.from(buttons).find(btn => btn.textContent === type);
+            selectedButton.className = `w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-500 hover:scale-110 active:scale-95 transform bg-red-500 border-red-600 text-white shadow-lg animate-pulse selected-type`;
+            
+            // Hide initial message
+            document.getElementById('initial-message').classList.add('hidden');
+            
+            // Hide results first (for animation effect)
+            document.getElementById('compatibility-results').classList.add('hidden');
+            
+            // Update selected blood type
+            document.getElementById('selected-blood-type').textContent = type;
+            document.getElementById('blood-type-description').textContent = compatibilityData[type].description;
+            
+            // Update donation compatibility
+            updateCompatibility('donate-compatibility', type, compatibilityData[type].canDonateTo, 'donate');
+            
+            // Update reception compatibility
+            updateCompatibility('receive-compatibility', type, compatibilityData[type].canReceiveFrom, 'receive');
+            
+            // Show results with delay for animation
+            setTimeout(() => {
+                document.getElementById('compatibility-results').classList.remove('hidden');
+            }, 300);
+        }
+
+        // Update compatibility cards
+        function updateCompatibility(containerId, selectedType, compatibleTypes, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            bloodTypes.forEach((bloodType, index) => {
+                const isCompatible = compatibleTypes.includes(bloodType);
+                const card = document.createElement('div');
+                card.className = `blood-type-card ${isCompatible ? type : 'inactive'}`;
+                card.style.animationDelay = `${index * 100}ms`;
+                card.textContent = bloodType;
+                
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
